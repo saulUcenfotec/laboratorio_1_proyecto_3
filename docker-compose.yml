@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: laboratorio1-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laboratorio1
+      MYSQL_USER: laboratorio1_app
+      MYSQL_PASSWORD: Laboratorio1Local_2026!
+      MYSQL_ROOT_PASSWORD: Laboratorio1Root_2026!
+    ports:
+      - "3307:3306"
+    volumes:
+      - laboratorio1_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  laboratorio1_mysql_data:
