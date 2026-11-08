@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,19 +31,20 @@ public class AuthController {
 
     /** Recibe credenciales válidas y devuelve un JWT para autenticar otras peticiones. */
     @PostMapping("/login")
-    public Map<String, String> login(@Valid @RequestBody LoginRequest request) {
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest request) {
         try {
             var authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-            return Map.of("token", jwtService.generate(authentication), "type", "Bearer");
+            return Map.of("token", jwtService.generate(authentication), "type", "Bearer",
+                    "authorities", authentication.getAuthorities().stream().map(a -> a.getAuthority()).toList());
         } catch (AuthenticationException exception) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
     }
 
-    /** Entrega el token CSRF que se envía en las solicitudes que modifican datos. */
+    /** Mantiene compatibilidad con la colección Postman anterior; JWT bearer no usa CSRF. */
     @GetMapping("/csrf")
-    public Map<String, String> csrf(CsrfToken token) {
-        return Map.of("headerName", token.getHeaderName(), "token", token.getToken());
+    public Map<String, String> csrf() {
+        return Map.of("headerName", "X-XSRF-TOKEN", "token", "");
     }
 }

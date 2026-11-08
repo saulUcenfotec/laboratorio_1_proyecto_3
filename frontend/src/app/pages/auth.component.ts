@@ -1,0 +1,10 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { ApiService } from '../core/api.service';
+import { SessionService } from '../core/guards';
+@Component({standalone:true,imports:[CommonModule,FormsModule,RouterLink],template:`<section class="auth"><h1>Iniciar sesion</h1><form (ngSubmit)="login()"><label>Usuario<input name="username" [(ngModel)]="username" required></label><label>Contrasena<input name="password" type="password" [(ngModel)]="password" required></label><button>Entrar</button></form><p>{{error}}</p><a routerLink="/registro">Crear una cuenta</a></section>`})
+export class LoginComponent {api=inject(ApiService);private router=inject(Router);private session=inject(SessionService);username='';password='';error='';login(){this.api.login({username:this.username,password:this.password}).subscribe({next:r=>{this.session.setAdmin(r.authorities?.includes('SUPER-ADMIN-ROLE')??false);this.router.navigateByUrl('/productos')},error:()=>this.error='Usuario o contrasena incorrectos'})}}
+@Component({standalone:true,imports:[CommonModule,FormsModule,RouterLink],template:`<section class="auth"><h1>Crear cuenta</h1><form (ngSubmit)="register()"><label>Usuario<input name="username" [(ngModel)]="username" minlength="3" required></label><label>Contrasena<input name="password" type="password" [(ngModel)]="password" minlength="8" required></label><button>Registrarme</button></form><p>{{message}}</p><a routerLink="/login">Volver al inicio de sesion</a></section>`})
+export class RegisterComponent {api=inject(ApiService);private router=inject(Router);username='';password='';message='';register(){this.api.register({username:this.username,password:this.password}).subscribe({next:()=>this.router.navigateByUrl('/login'),error:e=>this.message=e.status===409?'Ese nombre de usuario ya existe':'No se pudo crear la cuenta. Verifica los datos.'})}}

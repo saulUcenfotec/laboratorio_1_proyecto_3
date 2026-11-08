@@ -1,22 +1,21 @@
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: laboratorio1-mysql
+  postgres:
+    image: postgres:16
+    container_name: laboratorio1-postgres
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: laboratorio1
-      MYSQL_USER: laboratorio1_app
-      MYSQL_PASSWORD: Laboratorio1Local_2026!
-      MYSQL_ROOT_PASSWORD: Laboratorio1Root_2026!
+      POSTGRES_DB: laboratorio1
+      POSTGRES_USER: laboratorio1_app
+      POSTGRES_PASSWORD: Laboratorio1Local_2026!
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - laboratorio1_mysql_data:/var/lib/mysql
+      - laboratorio1_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      test: ["CMD-SHELL", "pg_isready -U laboratorio1_app -d laboratorio1"]
       interval: 5s
       timeout: 5s
       retries: 20
 
 volumes:
-  laboratorio1_mysql_data:
+  laboratorio1_postgres_data:
